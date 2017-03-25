@@ -1,0 +1,160 @@
+* Artificial Intelligence [[https://chalmersgu-ai-course.github.io/][Home page]]
+
+What are we going to do?
+
+ - Write an essay. <= 6 pages
+ - Shrdlite programming project
+ - Written and oral examination *2nd May*
+
+** Agents, R&N Chapter 2
+
+ - Agent functions
+if roomDirty: clean else: nextRoom
+
+Is there a best agent function?  Can we find it?  How do we now if
+something is /rational/ to do?
+
+A /rational agent/ chooses any action that:
+ - maximizes the expected value of the performance measure
+ - given the precept sequence to date.
+
+PEAS
+ - Performance measure
+Getting to the right place, following traffic laws, minimizing fuel
+consumption/time, maximizing safety.
+ - Environment
+roads, other traffic, pedestrians, road sing,s passengers
+ - Actuators
+steering, accelerator, brake signals
+ - Sensors
+GPS, cameras, sonar, speedometer, microphone etc
+
+Environment types: dimensions of Complexity
+| Dimension        | Possible vales                              |
+|------------------+---------------------------------------------|
+| Observable?      | full vs partial                             |
+| Deterministic    | Deterministic vs stochastic                 |
+| Episodic?        | Episodic vs sequential                      |
+| Static?          | Static vs dynamic?                          |
+| Discrete?        | discrete vs continuous                      |
+| Number of Agents | single vs multiple (competitive/cooperative |
+
+Different type of solutions
+ - Optimal solution
+ - Satisfying solution
+ - approximately optimal solution
+ - probable solution
+
+** Classical Search algorithms
+
+It is not always the fact that we have an algorithm to solve a
+specific problem, but only a /specification of a solution/ - we have
+to search for it.  A typical problem is when our /agent/ is in one
+state, it has a set of deterministic actions it can carry out, and
+wants to get to a goal state.
+
+Many AI problems can be abstracted into the problem of finding a path
+in a directed graph.  Each node is one state of the agent, each edge
+is a deterministic action the agent can take.  
+
+Often there is more than one way to represent a problem as a graph.
+
+State-space-search: Complexity dimensions
+
+|------------------+---------------|
+| Observable?      | full          |
+| Deterministic    | Deterministic |
+| Episodic?        | Episodic      |
+| Static?          | Static        |
+| Discrete?        | discrete      |
+| Number of Agents | single        |
+|------------------+---------------|
+
+Most complex problems has some subset of problems on this form.
+
+*** Some graph stuff
+# I left most out since its trivial.
+- The length of a path (n_0, n_1, ... n_k) = k, the number of edges.
+- The graph nodes are sometimes called /states/
+
+Fill in the table
+
+Example, the vacuum cleaner
+| States        | (A dirt, B dirty?, robot location) |
+| Initial state | any state                          |
+| Actions       | left, right, suck, non             |
+| Goal test     | (false, false, ~)                  |
+| Path cost     | 1 per action, 0 non                |
+
+The 8-puzzle
+| States        | a 9-tuple             |
+| Initial state | random                |
+| Actions       | UP, DOWN, LEFT, RIGHT |
+| Goal test     | (0,1,2...,8)          |
+| Path cost     |                       |
+
+The 8 queens problem
+| States        | A set of <= 8 coordinates       |
+| Initial state | no queens on board              |
+| Actions       | add a queen to any empty square |
+| Goal test     | 8 queens on boar, non attacked  |
+| Path cost     | 1 per move                      |
+
+The 8 queens problem alternative, much less paths to explore.
+| States        | one queen per clumn in leftmost coluns, none attaked |
+| Initial state | no queens on board                                   |
+| Actions       | add a queen to a square in the leftmost column       |
+| Goal test     | 8 queens on boar, non attacked                       |
+| Path cost     | 1 per move                                           |
+
+*** How do we search in a graph?
+- Given a graph, start nodes, and a goal description, incrementall,
+  explor paths from the start nodes
+- Maintain a /frontier/ of nodes that are to be explored
+
+**** DFS
+Treates the frontier as a stack.  The space complexity is linear, very
+nice.  However it doesnt always find the path with fewest edges.
+Exponential time complexity.
+
+**** BFS
+Treates the frontier as a queue.  Finds one of the paths with fewest
+arcs.  Exponential time complexity.  The space complexity is exponential.
+
+**** Unifrom-cost search
+The frontier is a priority queue ordered by path cost.
+
+*** A*-algorithm
+Main idea: don't ignore the goal when we select paths.
+- Often there is extra knowledge that can guide the search:
+  /heuristics/.
+- h(n) is an estimate of the cost of the shortest path from node n to
+  a goal node.
+- h(n) needs to be efficient to compute
+- h(n) is an /underestimate/ if there is no path from n to a goal with
+  cost less than h(n)
+- An admissible heuristic is a nonnegative heuristic function that is
+  an underestimate of the actual cost of a path to a goal.
+
+Here are some example heursitic functions:
+- If the nodes are points on a ecuclidean plane tand the cost is the
+  distane, h(n) can be the straight line distance SLD, from n to the
+  closest goal.
+- If the nodes are locations and cost is time, wen can use the
+  distance to a goal divided by the maximim speed, h(n) = d(n)/v_max
+- A heuristic functin can be found by solving a simpler (less
+  constrained) version of the problem.
+
+A* uses both path cost and heuristic values.
+cost(p) is the cost of path p.
+h(p) estimates the cost from the end node of p to a goal.
+
+
+**** Greedy best-first search
+Main idea: Select the path whose end is closest to a goal according to
+the heuristic function.
+
+However, greedy search is not optimal.  It might also fall into
+infinite loops, a bit like DFS.
+
+
