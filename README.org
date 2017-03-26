@@ -70,12 +70,22 @@ State-space-search: Complexity dimensions
 | Number of Agents | single        |
 |------------------+---------------|
 
-Most complex problems has some subset of problems on this form.
+Most complex problems (partly observable, stochastic, sequential)
+usualy have components using state-space search.
 
 *** Some graph stuff
 # I left most out since its trivial.
-- The length of a path (n_0, n_1, ... n_k) = k, the number of edges.
-- The graph nodes are sometimes called /states/
+A graph consists of a set NN of nodes and a set AA of ordered pairs of nodes,
+called arcs.
+
+- Node n_2 is a neighbor of n_1 if there is an arc from n_1 to
+  n_2.  That is, if (n_1,n_2)∈A.
+- A path is a sequence of nodes (n_0,n_1,…,n_k) such that
+  (n_{i-1},n_i)∈A
+- The length of path (n_0,n_1,…,n_k) is k.
+- A solution is a path from a start node to a goal node, given a set
+  of start nodes and goal nodes.
+- (Russel & Norvig sometimes call the graph nodes states).
 
 Fill in the table
 
@@ -108,23 +118,57 @@ The 8 queens problem alternative, much less paths to explore.
 | Path cost     | 1 per move                                           |
 
 *** How do we search in a graph?
-- Given a graph, start nodes, and a goal description, incrementall,
-  explor paths from the start nodes
-- Maintain a /frontier/ of nodes that are to be explored
+A generic search algorithm:
+
+- Given a graph, start nodes, and a goal description, incrementally
+  explore paths from the start nodes.
+- Maintain a /frontier/ of nodes that are to be explored.
+- As search proceeds, the frontier expands into the unexplored nodes
+  until a goal node is encountered.
+- The way in which the frontier is expanded defines the search
+  strategy.
+
 
 **** DFS
-Treates the frontier as a stack.  The space complexity is linear, very
-nice.  However it doesnt always find the path with fewest edges.
-Exponential time complexity.
+Depth-first search treats the frontier as a stack.
+
+It always selects one of the last elements added to the frontier.
+
+If the list of nodes on the frontier is [p_1,p_2,p_3,…], then:
+
+- p_1 is selected (and removed).
+- Nodes that extend p1p1 are added to the front of the stack (in front
+  of p_2).
+- p_2 is only selected when all nodes from p_1 have been explored.
+
+The space complexity is linear, very nice.  However it doesnt always
+find the path with fewest edges.  Exponential time complexity.
 
 **** BFS
+Breadth-first search treats the frontier as a queue.
+
+It always selects one of the earliest elements added to the frontier.
+
+If the list of paths on the frontier is [p_1,p_2,…,p_r], then:
+
+- p_1 is selected (and removed).
+- Its neighbors are added to the end of the queue, after p_r.
+- p_2 is selected next.
+
 Treates the frontier as a queue.  Finds one of the paths with fewest
 arcs.  Exponential time complexity.  The space complexity is exponential.
 
 **** Unifrom-cost search
-The frontier is a priority queue ordered by path cost.
+Weighted graphs: Sometimes there are costs associated with arcs.  The
+cost of a path is the sum of the costs of its arcs.  An /optimal
+solution/ is one with /minimum cost/.
 
-*** A*-algorithm
+- Uniform-cost search selects a path on the frontier with the lowest cost.
+- The frontier is a priority queue ordered by path cost.
+- It finds a least-cost path to a goal node — i.e., uniform-cost search is optimal
+- When arc costs are equal ⇒ breadth-first search.
+
+**** Heuristic search
 Main idea: don't ignore the goal when we select paths.
 - Often there is extra knowledge that can guide the search:
   /heuristics/.
@@ -154,7 +198,69 @@ h(p) estimates the cost from the end node of p to a goal.
 Main idea: Select the path whose end is closest to a goal according to
 the heuristic function.
 
+Best-first search selects a path on the frontier with minimal h-value.
+
+It treats the frontier as a priority queue ordered by h.
+
 However, greedy search is not optimal.  It might also fall into
 infinite loops, a bit like DFS.
 
+**** A* - search
+A* search uses both path cost and heuristic values.
 
+- /cost(p)/ is the cost of path /p/.
+- /h(p)/ estimates the cost from the end node of /p/ to a goal.
+- /f(p) = cost(p) + h(p)/ esitmates the total path cost of going from
+  the start node, via path p to a goal.
+
+A* is a mix of lowest-cost-first and best-first search.
+
+It treats the frontier as a priority queue ordered by f(p).
+
+It always selects the node on the frontier with the lowest estimated
+distance from the start to a goal node constrained to go via that
+node.
+
+***** A* will always find a solution if there is one, because:
+
+The frontier always contains the initial part of a path to a goal,
+before that goal is selected.
+
+A* halts, because the costs of the paths on the frontier keeps
+increasing, and will eventually exceed any finite number.
+
+***** If there is a solution, A* always finds an optimal one first, provided that:
+
+- the branching factor is finite,
+- arc costs are bounded above zero (i.e., there is some ϵ>0 such that
+  all of the arc costs are greater than ϵ), and
+- h(n) is nonnegative and an underestimate of the cost of the shortest
+  path from nn to a goal node.
+
+***** The first path that A* finds to a goal is an optimal path, because:
+
+- The f-value for any node on an optimal solution path is less than
+  or equal to the f-value of an optimal solution.  This is because hh
+  is an underestimate of the actual cost
+- Thus, the f-value of a node on an optimal solution path is less
+  than the f-value for any non-optimal solution.
+- Thus, a non-optimal solution can never be chosen while a node exists
+  on the frontier that leads to an optimal solution.  Because an
+  element with minimum f-value is chosen at each step
+- So, before it can select a non-optimal solution, it will have to
+  pick all of the nodes on an optimal path, including each of the
+  optimal solutions.
+
+_/A* gradually adds “f-contours” of nodes/_
+
+**** Admissible and consistent heuristics
+In computer science, specifically in algorithms related to
+pathfinding, a heuristic function is said to be admissible if it never
+overestimates the cost of reaching the goal, i.e. the cost it
+estimates to reach the goal is not higher than the lowest possible
+cost from the current point in the path.
+
+Admissible heuristics can be derived from the exact solution cost of a
+relaxed problem.  Key point: the optimal solution cost of a relaxed
+problem is never greater than the optimal solution cost of the real
+problem.
