@@ -141,7 +141,7 @@ If the list of nodes on the frontier is [p_1,p_2,p_3,…], then:
   of p_2).
 - p_2 is only selected when all nodes from p_1 have been explored.
 
-The space complexity is linear, very nice.  However it doesnt always
+The space complexity is linear O(bm), very nice.  However it doesnt always
 find the path with fewest edges.  Exponential time complexity.
 
 **** BFS
@@ -156,7 +156,8 @@ If the list of paths on the frontier is [p_1,p_2,…,p_r], then:
 - p_2 is selected next.
 
 Treates the frontier as a queue.  Finds one of the paths with fewest
-arcs.  Exponential time complexity.  The space complexity is exponential.
+arcs.  Exponential time complexity.  The space complexity is
+exponential O(b^m).
 
 **** Unifrom-cost search
 Weighted graphs: Sometimes there are costs associated with arcs.  The
@@ -258,9 +259,32 @@ In computer science, specifically in algorithms related to
 pathfinding, a heuristic function is said to be admissible if it never
 overestimates the cost of reaching the goal, i.e. the cost it
 estimates to reach the goal is not higher than the lowest possible
-cost from the current point in the path.
+cost from the current point in the path.  h(n) >= 0 needs to hold too.
 
 Admissible heuristics can be derived from the exact solution cost of a
 relaxed problem.  Key point: the optimal solution cost of a relaxed
 problem is never greater than the optimal solution cost of the real
 problem.
+
+If /h/ is consistent, then A* graph search is optimal.
+
+- Consistency is defined as: h(n′)≤cost(n′,n)+h(n) for all arcs (n′,n)
++ Proof: g(n)=g(n′)+cost(n′,n), therefore:
++ f(n)=g(n)+h(n)=g(n′)+cost(n′,n)+h(n)≥g(n′)+h(n′);
++ therefore: f(n)≥f(n′), i.e., f is nondecreasing
+
+
+- Theorem: whenever A* expands a node nn, the optimal path to nn has been found
++ Proof: Assume this is not true;
++ then there must be some n′ still on the frontier, which is on the optimal path to nn;
++ but f(n′)≤f(n);
++ and then n′ must already have been expanded ⟹ contradiction!
+
+Search
+| strategy          | Frontier selection     | Halts if solution? | Halts if no solution? | Space usage |
+| Depth first       | Last node added        | No                 | No                    | Linear      |
+| Breadth first     | First node added       | Yes                | No                    | Exp         |
+| Best first        | Global min h(p)h(p)    | No                 | No                    | Exp         |
+| Lowest cost first | Minimal cost(p)cost(p) | Yes                | No                    | Exp         |
+| A*                | Minimal f(p)f(p)       | Yes                | No                    | Exp         |
+* 
